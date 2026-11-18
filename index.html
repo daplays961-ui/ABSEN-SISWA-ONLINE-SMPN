@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#5b4bff">
+  <title>Absensi Siswa</title>
+  <style>
+    :root {
+      --primary:#5b4bff; --primary-dark:#4435df; --ink:#20213a;
+      --muted:#72758d; --line:#e8e9f3; --surface:#fff;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh; padding:28px 16px;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      color:var(--ink);
+      background:radial-gradient(circle at 10% 5%,#d9f5ff 0,transparent 30%),
+                 radial-gradient(circle at 90% 15%,#ffe0ef 0,transparent 28%),
+                 linear-gradient(135deg,#f5f4ff,#f7fbff 55%,#fff6f0);
+    }
+    .wrap { width:min(920px,100%); margin:auto; }
+    .hero {
+      position:relative; overflow:hidden; padding:30px; border-radius:26px;
+      color:white; background:linear-gradient(120deg,#5142ed,#8064ff 65%,#a45cf2);
+      box-shadow:0 18px 45px #5949dc30;
+    }
+    .hero:after { content:""; position:absolute; width:220px;height:220px;border-radius:50%;
+      background:#ffffff18;right:-55px;top:-90px; }
+    .eyebrow { font-size:12px; letter-spacing:2px; font-weight:800; opacity:.85; }
+    h1 { margin:9px 0 7px; font-size:clamp(28px,5vw,42px); letter-spacing:-1px; }
+    .hero p { margin:0; opacity:.9; }
+    .clock-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; position:relative;z-index:1; }
+    .pill { padding:10px 14px; border-radius:14px; background:#ffffff20; border:1px solid #ffffff35;
+      font-size:14px; font-weight:650; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px; }
+    .card { background:var(--surface); border:1px solid #ffffffb0; border-radius:22px;
+      padding:22px; box-shadow:0 10px 32px #32326a0c; }
+    .card h2 { margin:0 0 6px; font-size:19px; }
+    .sub { margin:0 0 18px; color:var(--muted); font-size:13px; }
+    label { display:block; margin:14px 0 7px; font-size:13px; font-weight:750; }
+    input[type=text] { width:100%; border:1.5px solid var(--line); border-radius:13px;
+      padding:14px 15px; font:inherit; outline:none; transition:.2s; }
+    input[type=text]:focus { border-color:var(--primary); box-shadow:0 0 0 4px #5b4bff16; }
+    .checkline { display:flex; align-items:center; gap:11px; padding:13px 14px;
+      margin-top:14px; background:#f4f3ff; border:1px solid #e7e4ff; border-radius:13px;
+      font-size:14px; font-weight:650; cursor:pointer; }
+    input[type=checkbox] { width:19px;height:19px; accent-color:var(--primary); }
+    button { width:100%; margin-top:17px; padding:14px; border:0; border-radius:13px;
+      color:white; background:linear-gradient(100deg,var(--primary),#8a55f5);
+      font:inherit; font-weight:800; cursor:pointer; box-shadow:0 8px 18px #604bfa35; }
+    button:hover { filter:brightness(1.05); transform:translateY(-1px); }
+    button:active { transform:translateY(0); }
+    .notice { min-height:20px; margin:12px 0 0; font-size:13px; font-weight:650; }
+    .success { color:#16834b; } .error { color:#c03950; }
+    .stats { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .stat { padding:15px; border-radius:16px; background:#f7f6ff; }
+    .stat strong { display:block; font-size:28px; color:var(--primary); }
+    .stat span { font-size:12px; color:var(--muted); font-weight:650; }
+    .list-card { margin-top:18px; }
+    .list-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .date-tag { color:var(--primary); background:#f0eeff; border-radius:30px; padding:7px 11px;
+      font-size:12px; font-weight:800; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; min-width:540px; margin-top:12px; }
+    th,td { text-align:left; padding:13px 10px; border-bottom:1px solid var(--line); font-size:13px; }
+    th { color:var(--muted); font-size:11px; letter-spacing:.6px; text-transform:uppercase; }
+    .status { display:inline-block; padding:5px 9px; border-radius:20px; color:#147a46;
+      background:#e7f8ef; font-size:11px; font-weight:800; }
+    .empty { text-align:center; padding:28px 10px; color:var(--muted); font-size:13px; }
+    footer { text-align:center; color:var(--muted); font-size:11px; margin:18px 0 0; line-height:1.7; }
+    @media(max-width:650px) { .grid {grid-template-columns:1fr;} .hero{padding:24px 20px;}
+      .card{padding:19px;} body{padding:16px 12px;} }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <div class="eyebrow">PORTAL KELAS • ABSENSI ONLINE</div>
+      <h1>Absensi Siswa</h1>
+      <p>Isi nama dan tandai kehadiranmu dengan tertib.</p>
+      <div class="clock-row">
+        <div class="pill">📅 <span id="today">Memuat tanggal…</span></div>
+        <div class="pill">🕒 <span id="clock">--:--:-- WIB</span></div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <form class="card" id="attendanceForm">
+        <h2>Isi Kehadiran</h2>
+        <p class="sub">Pastikan nama ditulis dengan benar sebelum mengirim.</p>
+        <label for="studentName">Nama lengkap</label>
+        <input id="studentName" name="studentName" type="text" maxlength="60"
+          placeholder="Contoh: Andi Saputra" autocomplete="name" required>
+        <label class="checkline" for="present">
+          <input id="present" type="checkbox" required>
+          <span>Saya menyatakan hadir hari ini</span>
+        </label>
+        <button type="submit">✓ Kirim Kehadiran</button>
+        <p id="message" class="notice" role="status" aria-live="polite"></p>
+      </form>
+
+      <section class="card" aria-label="Ringkasan absensi">
+        <h2>Ringkasan Hari Ini</h2>
+        <p class="sub">Jumlah kehadiran yang tercatat pada perangkat ini.</p>
+        <div class="stats">
+          <div class="stat"><strong id="total">0</strong><span>Siswa hadir</span></div>
+          <div class="stat"><strong id="lastTime">—</strong><span>Pengiriman terakhir (WIB)</span></div>
+        </div>
+        <p class="sub" style="margin:17px 0 0">Tanggal dan jam diperbarui otomatis mengikuti zona waktu WIB (UTC+7).</p>
+      </section>
+    </section>
+
+    <section class="card list-card">
+      <div class="list-head">
+        <div><h2>Daftar Kehadiran</h2><p class="sub" style="margin:5px 0 0">Catatan absensi untuk tanggal hari ini.</p></div>
+        <span class="date-tag" id="dateTag">HARI INI</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>No.</th><th>Nama siswa</th><th>Status</th><th>Tanggal</th><th>Waktu kirim (WIB)</th></tr></thead>
+          <tbody id="attendanceRows"></tbody>
+        </table>
+        <div id="emptyState" class="empty">Belum ada siswa yang mengisi absensi hari ini.</div>
+      </div>
+    </section>
+    <footer>Waktu menggunakan zona WIB (Asia/Jakarta).<br>Versi ini menyimpan data di browser/perangkat yang digunakan.</footer>
+  </main>
+
+  <script>
+    const TIME_ZONE = 'Asia/Jakarta';
+    const STORAGE_KEY = 'absensi-siswa-v1';
+
+    function partsInWIB(date = new Date()) {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+      }).formatToParts(date);
+      return Object.fromEntries(parts.map(p => [p.type, p.value]));
+    }
+    function dateKey(date = new Date()) {
+      const p = partsInWIB(date);
+      return `${p.year}-${p.month}-${p.day}`;
+    }
+    function prettyDate(date = new Date()) {
+      return new Intl.DateTimeFormat('id-ID', {
+        timeZone: TIME_ZONE, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      }).format(date);
+    }
+    function timeWIB(date = new Date()) {
+      const p = partsInWIB(date);
+      return `${p.hour}:${p.minute}:${p.second} WIB`;
+    }
+    function readRecords() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+      catch { return []; }
+    }
+    function saveRecords(records) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+      })[ch]);
+    }
+    function refreshClock() {
+      const now = new Date();
+      document.getElementById('today').textContent = prettyDate(now);
+      document.getElementById('clock').textContent = timeWIB(now);
+      document.getElementById('dateTag').textContent = prettyDate(now).toUpperCase();
+      renderRows();
+    }
+    function renderRows() {
+      const today = dateKey();
+      const todaysRecords = readRecords().filter(item => item.date === today)
+        .sort((a,b) => a.timestamp - b.timestamp);
+      document.getElementById('total').textContent = todaysRecords.length;
+      document.getElementById('lastTime').textContent = todaysRecords.length
+        ? todaysRecords[todaysRecords.length - 1].time.slice(0,5) : '—';
+      const tbody = document.getElementById('attendanceRows');
+      document.getElementById('emptyState').style.display = todaysRecords.length ? 'none' : 'block';
+      tbody.innerHTML = todaysRecords.map((item,index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td><strong>${escapeHTML(item.name)}</strong></td>
+          <td><span class="status">Hadir</span></td>
+          <td>${escapeHTML(item.dateDisplay)}</td>
+          <td>${escapeHTML(item.time)}</td>
+        </tr>`).join('');
+    }
+
+    document.getElementById('attendanceForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const name = document.getElementById('studentName').value.trim().replace(/\s+/g, ' ');
+      const checked = document.getElementById('present').checked;
+      const message = document.getElementById('message');
+      message.className = 'notice';
+      if (!name) {
+        message.textContent = 'Silakan isi nama lengkap terlebih dahulu.';
+        message.classList.add('error'); return;
+      }
+      if (!checked) {
+        message.textContent = 'Centang pernyataan hadir sebelum mengirim.';
+        message.classList.add('error'); return;
+      }
+      const now = new Date();
+      const today = dateKey(now);
+      const records = readRecords();
+      if (records.some(item => item.date === today && item.name.toLocaleLowerCase('id-ID') === name.toLocaleLowerCase('id-ID'))) {
+        message.textContent = 'Nama ini sudah tercatat hadir hari ini.';
+        message.classList.add('error'); return;
+      }
+      const p = partsInWIB(now);
+      const time = `${p.hour}:${p.minute}:${p.second} WIB`;
+      records.push({
+        name, date: today, dateDisplay: prettyDate(now), time,
+        timestamp: now.getTime()
+      });
+      try {
+        saveRecords(records);
+        document.getElementById('studentName').value = '';
+        document.getElementById('present').checked = false;
+        message.textContent = `Berhasil! Kehadiran ${name} tercatat pukul ${time}.`;
+        message.classList.add('success');
+        renderRows();
+      } catch {
+        message.textContent = 'Data tidak dapat disimpan. Periksa ruang penyimpanan browser.';
+        message.classList.add('error');
+      }
+    });
+
+    refreshClock();
+    setInterval(refreshClock, 1000);
+    // Jika halaman dibiarkan terbuka melewati tengah malam WIB, tanggal akan berganti otomatis.
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshClock(); });
+  </script>
+</body>
+</html>
